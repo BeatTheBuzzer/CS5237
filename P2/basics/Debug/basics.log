@@ -1,9 +1,40 @@
-﻿生成启动时间为 9/14/2013 22:59:56 PM。
-     1>项目“C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basics\basics.vcxproj”在节点 3 上(clean 个目标)。
-     1>_PrepareForClean:
-         正在删除文件“.\Debug\basics.lastbuildstate”。
-     1>已完成生成项目“C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basics\basics.vcxproj”(clean 个目标)的操作。
+﻿Build started 21 Sep, 2013 17:01:28.
+     1>Project "D:\Dropbox\ComputerScience\CS5237\P2\basics\basics.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating ".\Debug\basics.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _VC80_UPGRADE=0x0600 /D _MBCS /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp".\Debug/basics.pch" /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /Gd /TP /analyze- /errorReport:prompt StdAfx.cpp
+         StdAfx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _LIB /D _VC80_UPGRADE=0x0600 /D _MBCS /D _AFXDLL /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo".\Debug/" /Fd".\Debug/vc100.pdb" /Gd /TP /analyze- /errorReport:prompt li.cpp lmath.cpp pointSet.cpp stopWatch.cpp
+         stopWatch.cpp
+         pointSet.cpp
+         lmath.cpp
+         li.cpp
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(77): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(87): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(94): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(104): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(111): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(136): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(147): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(160): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(171): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(182): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(193): warning C4018: '<' : signed/unsigned mismatch
+     1>d:\dropbox\computerscience\cs5237\p2\basics\li.cpp(264): warning C4244: 'initializing' : conversion from '__int64' to 'long', possible loss of data
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:".\Debug\basics.lib" /NOLOGO .\Debug/li.obj
+         .\Debug/lmath.obj
+         .\Debug/pointSet.obj
+         .\Debug/StdAfx.obj
+         .\Debug/stopWatch.obj
+         basics.vcxproj -> D:\Dropbox\ComputerScience\CS5237\P2\basics\.\Debug\basics.lib
+       FinalizeBuildStatus:
+         Deleting file ".\Debug\basics.unsuccessfulbuild".
+         Touching ".\Debug\basics.lastbuildstate".
+     1>Done Building Project "D:\Dropbox\ComputerScience\CS5237\P2\basics\basics.vcxproj" (build target(s)).
 
-生成成功。
+Build succeeded.
 
-已用时间 00:00:00.00
+Time Elapsed 00:00:07.52

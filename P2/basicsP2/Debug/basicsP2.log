@@ -1,9 +1,22 @@
-﻿生成启动时间为 9/14/2013 22:59:56 PM。
-     1>项目“C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basicsP2\basicsP2.vcxproj”在节点 3 上(clean 个目标)。
-     1>_PrepareForClean:
-         正在删除文件“Debug\basicsP2.lastbuildstate”。
-     1>已完成生成项目“C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basicsP2\basicsP2.vcxproj”(clean 个目标)的操作。
+﻿Build started 21 Sep, 2013 17:01:36.
+     1>Project "D:\Dropbox\ComputerScience\CS5237\P2\basicsP2\basicsP2.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "Debug\basicsP2.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt pointSetArray.cpp trist.cpp
+         trist.cpp
+         pointSetArray.cpp
+     1>d:\dropbox\computerscience\cs5237\p2\basicsp2\pointsetarray.cpp(6): warning C4018: '>=' : signed/unsigned mismatch
+         Generating Code...
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"D:\Dropbox\ComputerScience\CS5237\P2\Debug\basicsP2.lib" /NOLOGO Debug\pointSetArray.obj
+         Debug\trist.obj
+         basicsP2.vcxproj -> D:\Dropbox\ComputerScience\CS5237\P2\Debug\basicsP2.lib
+       FinalizeBuildStatus:
+         Deleting file "Debug\basicsP2.unsuccessfulbuild".
+         Touching "Debug\basicsP2.lastbuildstate".
+     1>Done Building Project "D:\Dropbox\ComputerScience\CS5237\P2\basicsP2\basicsP2.vcxproj" (build target(s)).
 
-生成成功。
+Build succeeded.
 
-已用时间 00:00:00.00
+Time Elapsed 00:00:02.85
