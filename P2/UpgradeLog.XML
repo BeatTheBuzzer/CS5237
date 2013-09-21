@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Phase II">
+</Property><Property Name="解决方案文件" Value="C:\Users\workshop\phd\13-14\1\CS5237\Phase II\Phase II.sln">
+</Property><Property Name="用户选项文件" Value="C:\Users\workshop\phd\13-14\1\CS5237\Phase II\Phase II.suo">
+</Property><Property Name="Date" Value="Wednesday, September 11, 2013">
+</Property><Property Name="Time" Value="20:26 PM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="Phase II.sln" Description="文件已成功备份为 C:\Users\workshop\phd\13-14\1\CS5237\Phase II\Phase II.sln.old">
+</Event><Event ErrorLevel="0" Project="" Source="Phase II.suo" Description="文件已成功备份为 C:\Users\workshop\phd\13-14\1\CS5237\Phase II\Phase II.suo.old">
+</Event><Event ErrorLevel="0" Project="lab 4" Source="lab 4.vcproj" Description="Converting project file 'C:\Users\workshop\phd\13-14\1\CS5237\Phase II\lab 4.vcproj'.">
+</Event><Event ErrorLevel="1" Project="lab 4" Source="lab 4.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="0" Project="lab 4" Source="lab 4.vcproj" Description="Done converting to new project file 'C:\Users\workshop\phd\13-14\1\CS5237\Phase II\lab 4.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="lab 4" Source="lab 4.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="basics" Source="basics\basics.vcproj" Description="Converting project file 'C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basics\basics.vcproj'.">
+</Event><Event ErrorLevel="1" Project="basics" Source="basics\basics.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="1" Project="basics" Source="basics\basics.vcproj" Description="MSB8012: $(TargetPath) ('C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basics\.\Debug\basics.lib') does not match the Librarian's OutputFile property value '.\Debug\basics.lib' ('C:\Users\workshop\phd\13-14\1\CS5237\Phase II\Debug\basics.lib') in project configuration 'Debug|Win32'. This may cause your project to build incorrectly. To correct this, please make sure that $(TargetPath) property value matches the value specified in %(Lib.OutputFile).">
+</Event><Event ErrorLevel="1" Project="basics" Source="basics\basics.vcproj" Description="MSB8012: $(TargetPath) ('C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basics\.\Release\basics.lib') does not match the Librarian's OutputFile property value '.\Release\basics.lib' ('C:\Users\workshop\phd\13-14\1\CS5237\Phase II\Release\basics.lib') in project configuration 'Release|Win32'. This may cause your project to build incorrectly. To correct this, please make sure that $(TargetPath) property value matches the value specified in %(Lib.OutputFile).">
+</Event><Event ErrorLevel="0" Project="basics" Source="basics\basics.vcproj" Description="Done converting to new project file 'C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basics\basics.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="basics" Source="basics\basics.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="basicsP2" Source="basicsP2\basicsP2.vcproj" Description="Converting project file 'C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basicsP2\basicsP2.vcproj'.">
+</Event><Event ErrorLevel="1" Project="basicsP2" Source="basicsP2\basicsP2.vcproj" Description="VCWebServiceProxyGeneratorTool is no longer supported. The tool has been removed from your project settings.">
+</Event><Event ErrorLevel="0" Project="basicsP2" Source="basicsP2\basicsP2.vcproj" Description="Done converting to new project file 'C:\Users\workshop\phd\13-14\1\CS5237\Phase II\basicsP2\basicsP2.vcxproj'.">
+</Event><Event ErrorLevel="3" Project="basicsP2" Source="basicsP2\basicsP2.vcproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="Phase II.sln" Description="成功转换解决方案">
+</Event><Event ErrorLevel="3" Project="" Source="Phase II.sln" Description="Converted">
+</Event></UpgradeLog>

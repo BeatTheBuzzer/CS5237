@@ -1,0 +1,6 @@
+Point 1: -100	0
+Point 2: 100	0
+Point 3: 0	100
+Point 4: 0	-100
+Triangle 1: 1	2	3
+Triangle 2: 2	1	4
