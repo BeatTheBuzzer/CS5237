@@ -50,6 +50,8 @@ class Trist {
 
 
 	public:
+
+		void flipping(int i, int j, int idx,int idx1,int idx2, int idx3);
 		Trist();
 		int noTri(); // return the number of triangles
 		int makeTri(int pIndex1,int pIndex2,int pIndex3,bool autoMerge = false); // Add a triangle into the Trist with the three point indices

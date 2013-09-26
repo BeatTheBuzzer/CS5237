@@ -244,12 +244,14 @@ void legalizeEdge(Trist &tri, int idx, int idx1, int idx2, int triangleIdx){
 	}
 	if(ans > 0){
 		// flip edge idx1idx2 with idxidx3
-		int triIdx1 = tri.makeTri(idx,idx1,idx3);
-		int triIdx2 = tri.makeTri(idx,idx2,idx3);
-		legalizeEdge(tri,idx,idx1,idx3,triIdx1);
-		legalizeEdge(tri,idx,idx2,idx3,triIdx2);
-		tri.delTri(triangleIdx<<3);
-		tri.delTri(triangleIdx2<<3);
+
+		//int triIdx1 = tri.makeTri(idx,idx1,idx3);
+		//int triIdx2 = tri.makeTri(idx,idx2,idx3);
+		tri.flipping(triangleIdx,triangleIdx2,idx,idx1,idx2,idx3);
+		legalizeEdge(tri,idx,idx1,idx3,triangleIdx);
+		legalizeEdge(tri,idx,idx2,idx3,triangleIdx2);
+		//tri.delTri(triangleIdx<<3);
+		//tri.delTri(triangleIdx2<<3);
 	}
 }
 bool IPhelper(Trist &tri1, int x, int y){

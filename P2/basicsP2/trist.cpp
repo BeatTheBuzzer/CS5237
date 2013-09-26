@@ -141,3 +141,12 @@ void Trist::fdetach(OrTri abc){
 void Trist::incidentTriangles(int ptIndex,int& noOrTri, OrTri* otList){
 	// A suggested function: you may want this function to return all the OrTri
 }
+
+void Trist::flipping(int i, int j, int idx,int idx1,int idx2, int idx3){
+	myTris[i-1].vi_[0] = idx;
+	myTris[i-1].vi_[1] = idx1;
+	myTris[i-1].vi_[2] = idx3;
+	myTris[j-1].vi_[0] = idx;
+	myTris[j-1].vi_[1] = idx2;
+	myTris[j-1].vi_[2] = idx3;
+}
