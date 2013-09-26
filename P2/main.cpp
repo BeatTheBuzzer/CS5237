@@ -1,4 +1,3 @@
-
 #include "basicsP2\pointSetArray.h"
 #include "basicsP2\Trist.h"
 
@@ -34,7 +33,7 @@ void drawAPoint(double x,double y)
 	glPointSize(5);
 	glBegin(GL_POINTS);
 	glColor3f(0,0,0);
-		glVertex2d(x,y);
+	glVertex2d(x,y);
 	glEnd();
 	glPointSize(1);
 }
@@ -44,8 +43,8 @@ void drawALine(double x1,double y1, double x2, double y2)
 	glPointSize(1);
 	glBegin(GL_LINE_LOOP);
 	glColor3f(0,0,1);
-		glVertex2d(x1,y1);
-		glVertex2d(x2,y2);
+	glVertex2d(x1,y1);
+	glVertex2d(x2,y2);
 	glEnd();
 }
 
@@ -67,9 +66,9 @@ void drawATriangle(int ix1, int ix2, int ix3)
 
 	glBegin(GL_POLYGON);
 	glColor3f(0,0.5,0);
-		glVertex2d(x1,y1);
-		glVertex2d(x2,y2);
-		glVertex2d(x3,y3);
+	glVertex2d(x1,y1);
+	glVertex2d(x2,y2);
+	glVertex2d(x3,y3);
 	glEnd();
 
 	drawALine(x1,y1,x2,y2);
@@ -198,8 +197,57 @@ void readFile(){
 	}
 }
 
-bool IPhelper(Trist &tri1, int x, int y){
+
+int getVertex(Trist &tri, int idx, int idx1, int idx2, int &triangleIdx){
 	int i,a,b,c,d;
+	for (i=1;i<=tri.noTri();i++){
+		tri.getVertexIdx(i<<3,a,b,c);
+		if(a==idx1){
+			if(b==idx2){
+				triangleIdx = i;
+				return c;
+			}
+			else if(c==idx2) {
+				triangleIdx = i;
+				return b;
+			}
+		}else if(a==idx2){
+			if(b==idx1) {
+				triangleIdx = i;
+				return c;
+			}
+			else if(c==idx1) {
+				triangleIdx = i;
+				return c;
+			}
+		}else{
+			if((b==idx1&&c==idx2)||(b==idx2&&c==idx1)){
+				triangleIdx = i;
+				return a;
+			}
+		}
+	}
+	return -1;
+}
+void legalizeEdge(Trist &tri, int idx, int idx1, int idx2, int triangleIdx){
+	int triangleIdx2;
+	int idx3 = getVertex(myTrist, idx, idx1,idx2, triangleIdx2);
+	int ans = myPointSet.inCircle(idx,idx1,idx2,idx3);
+	if(ans ==0){
+		cout<<"degenerate"<<endl;
+	}
+	if(ans > 0){
+
+		tri.delTri(triangleIdx<<3);
+		tri.delTri(triangleIdx2<<3);
+		int triIdx1 = tri.makeTri(idx,idx1,idx3);
+		int triIdx2 = tri.makeTri(idx,idx2,idx3);
+		legalizeEdge(tri,idx,idx1,idx3,triIdx1);
+		legalizeEdge(tri,idx,idx2,idx3,triIdx2);
+	}
+}
+bool IPhelper(Trist &tri1, int x, int y){
+	int i,a,b,c,d, triangleIdx1, triangleIdx2, triangleIdx3;
 	MyPoint pd;
 	x=x/scale[nowS];
 	y=y/scale[nowS];
@@ -208,11 +256,15 @@ bool IPhelper(Trist &tri1, int x, int y){
 	for (i=1;i<=tri1.noTri();i++){
 		tri1.getVertexIdx(i<<3,a,b,c);
 		if (myPointSet.inTri(a,b,c,pd)>0){
+		
 			d=myPointSet.addPoint(LongInt(x),LongInt(y));
 			tri1.delTri(i<<3);
-			tri1.makeTri(a,b,d);
-			tri1.makeTri(b,c,d);
-			tri1.makeTri(a,c,d);
+			triangleIdx1 = tri1.makeTri(a,b,d);
+			triangleIdx2 = tri1.makeTri(b,c,d);
+			triangleIdx3 = tri1.makeTri(a,c,d);
+			legalizeEdge(tri1,d,a,b, triangleIdx1);
+			legalizeEdge(tri1,d,a,c, triangleIdx3);
+			legalizeEdge(tri1,d,b,c, triangleIdx2);
 			return 1;
 		}
 	}
@@ -236,36 +288,75 @@ void writeFile()
 	}
 	cout<<"Wirte to file successfully!"<<endl;
 }
+bool locate(Trist &tri1, LongInt x, LongInt y, int& pIdx1,int& pIdx2,int& pIdx3){
+	int i, idx1, idx2, idx3, idx4;
+	MyPoint pd;
+	pd.x = x;
+	pd.y = y;
+	for (i = 1; i<= tri1.noTri(); i++){
+		tri1.getVertexIdx(i<<3, idx1, idx2, idx3);
+		if (myPointSet.inTri(idx1, idx2, idx3, pd)>0){
+			idx4 = myPointSet.addPoint(LongInt(x),LongInt(y));
+			tri1.delTri(i<<3);
+			tri1.makeTri(idx1, idx2, idx4);
+			tri1.makeTri(idx2, idx3, idx4);
+			tri1.makeTri(idx1, idx3, idx4);
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void insert(){
+
+}
+
+void Denaulay(){
+	//initialization
+	LongInt x, y;
+	int i, idx1, idx2, idx3, idx4;
+	for (i=0; i<myPointSet.noPt(); i++){		
+		myPointSet.getPoint(i,x,y);
+		locate(myTrist, x, y, idx1, idx2, idx3);
+		cout << ""+idx1<<"";
+		//insert();
+	}
+
+	//discard P-1,p-2 and p-3
+}
 
 void keyboard (unsigned char key, int x, int y)
 {
 	switch (key) {
-		case 'r':
-		case 'R':
-			readFile();
+	case 'r':
+	case 'R':
+		readFile();
 		break;
 
-		case 'w':
-		case 'W':
-			writeFile();
+	case 'w':
+	case 'W':
+		writeFile();
 		break;
 
-		case 'Q':
-		case 'q':
-			exit(0);
+	case 'Q':
+	case 'q':
+		exit(0);
 		break;
 
-		case '+':
-			if (nowS<19)
-				nowS++;
+	case '+':
+		if (nowS<19)
+			nowS++;
 		break;
 
-		case '-':
-			if (nowS>0)
-				nowS--;
+	case '-':
+		if (nowS>0)
+			nowS--;
 		break;
-
-		default:
+	case 'c':
+	case 'C':
+		Denaulay();
+		break;
+	default:
 		break;
 	}
 
@@ -301,17 +392,17 @@ void mouse(int button, int state, int x, int y)
 void special(int key, int x, int y)
 {
 	switch (key) {
-		case GLUT_KEY_UP:
-			DY-=5;
+	case GLUT_KEY_UP:
+		DY-=5;
 		break;
-		case GLUT_KEY_DOWN:
-			DY+=5;
+	case GLUT_KEY_DOWN:
+		DY+=5;
 		break;
-		case GLUT_KEY_LEFT:
-			DX-=5;
+	case GLUT_KEY_LEFT:
+		DX-=5;
 		break;
-		case GLUT_KEY_RIGHT:
-			DX+=5;
+	case GLUT_KEY_RIGHT:
+		DX+=5;
 		break;
 	}
 	glutPostRedisplay();

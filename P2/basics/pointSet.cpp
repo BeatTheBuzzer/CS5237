@@ -9,49 +9,42 @@ int PointSet::addPoint(LongInt x1, LongInt y1){
 	myPoints.push_back(thisPoint);
 	return (myPoints.size());
 }
+LongInt det3(LongInt x1, LongInt y1, LongInt w1,
+	LongInt x2, LongInt y2, LongInt w2,
+	LongInt x3, LongInt y3, LongInt w3){
+	return x1*y2*w3+x2*y3*w1+x3*y1*w2-x1*y3*w2-x2*y1*w3-x3*y2*w1;
+}
 
+int signDet4(LongInt a11, LongInt a12, LongInt a13, LongInt a14,
+	LongInt a21, LongInt a22, LongInt a23, LongInt a24,
+	LongInt a31, LongInt a32, LongInt a33, LongInt a34,
+	LongInt a41, LongInt a42, LongInt a43, LongInt a44){
+	LongInt det = a11*det3(a22, a23, a24, a32, a33, a34, a42, a43, a44)-a21*det3(a12, a13,a14, a32, a33, a34, a42, a43,a44)+
+		a31*det3(a12, a13, a14, a22, a23, a24, a42, a43, a44)-a41*det3(a12, a13, a14, a22, a23, a24, a32, a33, a34);
+	if(det>0) return 1;
+	else if(det<0) return -1;
+	else return 0;
+}
 int PointSet::inCircle(int p1Idx, int p2Idx, int p3Idx, int pIdx) {
-	int i,j,k,l;
-	LongInt x[4],y[4],mat1[4][4],mat2[3][3],temp[3][3],det1;
-	p1Idx--;
-	p2Idx--;
-	p3Idx--;
-	pIdx--;
-	x[0]=myPoints[p1Idx].x;
-	x[1]=myPoints[p2Idx].x;
-	x[2]=myPoints[p3Idx].x;
-	x[3]=myPoints[pIdx].x;
+	LongInt xa=myPoints.at(p1Idx-1).x, ya=myPoints.at(p1Idx-1).y, za=xa*xa+ya*ya;
+	LongInt xb=myPoints.at(p2Idx-1).x, yb=myPoints.at(p2Idx-1).y, zb=xb*xb+yb*yb;
+	LongInt xc=myPoints.at(p3Idx-1).x, yc=myPoints.at(p3Idx-1).y, zc=xc*xc+yc*yc;
+	LongInt xd=myPoints.at(pIdx-1).x, yd=myPoints.at(pIdx-1).y, zd=xd*xd+yd*yd;
 
-	y[0]=myPoints[p1Idx].y;
-	y[1]=myPoints[p2Idx].y;
-	y[2]=myPoints[p3Idx].y;
-	y[3]=myPoints[pIdx].y;
-
-	for (i=0;i<4;i++){
-		mat1[i][0]=x[i];
-		mat1[i][1]=y[i];
-		mat1[i][2]=x[i]*x[i]+y[i]*y[i];
-		mat1[i][3]=1;
-	}
-	det1=0;
-	for (i=0;i<4;i++){
-		l=0;
-		for (j=0;j<4;j++){
-			if (i==j) continue;
-			for (k=0;k<3;k++)
-				temp[k][l]=mat1[k+1][j];
-			l++;
-		}
-		if (i%2)
-			det1=det1-mat1[0][i]*Det(temp);
-		else det1=det1+mat1[0][i]*Det(temp);
-	}
-	for (i=0;i<3;i++){
-		mat2[i][0]=x[i];
-		mat2[i][1]=y[i];
-		mat2[i][2]=1;
-	}
-	return det1.sign()*signDet(mat2);
+	int det1 = signDet4(xa, ya, za, 1,
+					xb, yb, zb, 1,
+					xc, yc, zc, 1,
+					xd, yd, zd, 1);
+	int det2 = signDet(xa, ya, 1,
+					   xb, yb, 1,
+					   xc, yc, 1);
+	int det=det1*det2;
+	
+	//if(det1 == 0 || det2 == 0) return 0;
+	if(det>0)
+		return 1;
+	else if(det<0) return -1;
+	else return 0;
 }
 
 
