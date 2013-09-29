@@ -1,4 +1,3 @@
-
 #include "basicsP2\pointSetArray.h"
 #include "basicsP2\Trist.h"
 
@@ -12,16 +11,15 @@
 #include <strstream>
 #include <string>
 #include <sstream>
-
+#include <vector>
 using namespace std;
 
 PointSetArray myPointSet;
 Trist myTrist, noIPTrist;
+std::vector<int> vec;
 double scale[]={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 int nowS=9;
 int DX=500, DY=300;
-
-bool IPhelper(Trist &tri1, int x, int y);
 
 // These three functions are for those who are not familiar with OpenGL, you can change these or even completely ignore them
 
@@ -34,7 +32,7 @@ void drawAPoint(double x,double y)
 	glPointSize(5);
 	glBegin(GL_POINTS);
 	glColor3f(0,0,0);
-		glVertex2d(x,y);
+	glVertex2d(x,y);
 	glEnd();
 	glPointSize(1);
 }
@@ -44,8 +42,8 @@ void drawALine(double x1,double y1, double x2, double y2)
 	glPointSize(1);
 	glBegin(GL_LINE_LOOP);
 	glColor3f(0,0,1);
-		glVertex2d(x1,y1);
-		glVertex2d(x2,y2);
+	glVertex2d(x1,y1);
+	glVertex2d(x2,y2);
 	glEnd();
 }
 
@@ -67,9 +65,9 @@ void drawATriangle(int ix1, int ix2, int ix3)
 
 	glBegin(GL_POLYGON);
 	glColor3f(0,0.5,0);
-		glVertex2d(x1,y1);
-		glVertex2d(x2,y2);
-		glVertex2d(x3,y3);
+	glVertex2d(x1,y1);
+	glVertex2d(x2,y2);
+	glVertex2d(x3,y3);
 	glEnd();
 
 	drawALine(x1,y1,x2,y2);
@@ -77,8 +75,6 @@ void drawATriangle(int ix1, int ix2, int ix3)
 	drawALine(x2,y2,x3,y3);
 
 }
-
-
 
 void display(void)
 {
@@ -116,9 +112,137 @@ void reshape (int w, int h)
 
 void init(void)
 {
-	glClearColor (1.0,1.0,1.0, 1.0);
+	glClearColor(1.0,1.0,1.0, 1.0);
 }
 
+int getVertex(Trist &tri, int idx, int idx1, int idx2, int &triangleIdx){
+	int i,a,b,c,d;
+	int ans;
+	for (i=1;i<=tri.noTri();i++){
+		tri.getVertexIdx(i<<3,a,b,c);
+		if(a==idx1){
+			if(b==idx2){
+				triangleIdx = i;
+				if (c !=idx)
+				return c;
+			}
+			else if(c==idx2) {
+				triangleIdx = i;
+				if (b !=idx)
+				return b;
+			}
+		}else if(a==idx2){
+			if(b==idx1) {
+				triangleIdx = i;
+				if (c !=idx)
+				return c;
+			}
+			else if(c==idx1) {
+				triangleIdx = i;
+				if (c !=idx)
+				return c;
+			}
+		}else{
+			if((b==idx1&&c==idx2)||(b==idx2&&c==idx1)){
+				triangleIdx = i;
+				if (a !=idx)
+				return a;
+			}
+		}
+	}
+	return -1;
+}
+
+void legalizeEdge(Trist &tri, int idx, int idx1, int idx2, int triangleIdx){
+	int triangleIdx2;
+	int idx3 = getVertex(myTrist, idx, idx1,idx2, triangleIdx2);
+	if(idx3==-1) return;
+	int ans = myPointSet.inCircle(idx,idx1,idx2,idx3);
+	//OrTri ef = myTrist.fnext(triangleIdx<<3);
+	//cout<<"triangleIdx2 is "<<triangleIdx2<<endl;
+	//cout<<"ef is "<<(ef>>3)<<endl;
+	/*
+	if(ans ==0){
+		cout<<"degenerate"<<endl;
+	}*/
+	if(ans > 0){
+		// flip edge idx1idx2 with idxidx3
+
+		//int triIdx1 = tri.makeTri(idx,idx1,idx3);
+		//int triIdx2 = tri.makeTri(idx,idx2,idx3);
+		tri.flipping(triangleIdx,triangleIdx2,idx,idx1,idx2,idx3);
+		legalizeEdge(tri,idx,idx1,idx3,triangleIdx);
+		legalizeEdge(tri,idx,idx2,idx3,triangleIdx2);
+		//tri.delTri(triangleIdx<<3);
+		//tri.delTri(triangleIdx2<<3);
+	}
+}
+
+bool IPhelper(Trist &tri1, int x, int y, bool readfile){
+	int i,a,b,c,d, triangleIdx1, triangleIdx2, triangleIdx3;
+	MyPoint pd;
+	//cout<<x<<endl;cout<<y<<endl;
+	x=x/scale[nowS];
+	y=y/scale[nowS];
+	pd.x=LongInt(x);
+	pd.y=LongInt(y);
+	d=myPointSet.addPoint(LongInt(x),LongInt(y));
+
+	for (i=1;i<=tri1.noTri();i++){
+		tri1.getVertexIdx(i<<3,a,b,c);
+		if (myPointSet.inTri(a,b,c,pd)>0){				
+			vec.push_back(d);
+			if(readfile){
+				tri1.delTri(i<<3);
+				triangleIdx1 = tri1.makeTri(a,b,d);
+				triangleIdx2 = tri1.makeTri(b,c,d);
+				triangleIdx3 = tri1.makeTri(a,c,d);
+				legalizeEdge(tri1,d,a,b, triangleIdx1);			
+				legalizeEdge(tri1,d,b,c, triangleIdx2);
+				legalizeEdge(tri1,d,a,c, triangleIdx3);
+			}
+			return 1;
+		}
+	}
+	return 0;
+}
+
+void insert(Trist &tri1, int pIdx){
+	int i,a,b,c,d, triangleIdx1, triangleIdx2, triangleIdx3;
+	MyPoint pd;
+	myPointSet.getPoint(pIdx,pd.x,pd.y);
+	
+	for (i=1;i<=tri1.noTri();i++){
+		tri1.getVertexIdx(i<<3,a,b,c);
+		if (myPointSet.inTri(a,b,c,pd)>0){					
+			tri1.delTri(i<<3);
+			triangleIdx1 = tri1.makeTri(a,b,pIdx);
+			triangleIdx2 = tri1.makeTri(b,c,pIdx);
+			triangleIdx3 = tri1.makeTri(a,c,pIdx);
+			legalizeEdge(tri1,pIdx,a,b, triangleIdx1);			
+			legalizeEdge(tri1,pIdx,b,c, triangleIdx2);
+			legalizeEdge(tri1,pIdx,a,c, triangleIdx3);
+			return;
+		}
+	}
+}
+
+void Delaunay(){
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	int start = (((st.wHour*60+st.wMinute)*60)+st.wSecond)*1000+st.wMilliseconds;
+	cerr << "Start: " << start << endl;
+
+	for(int i=0;i<vec.size();i++){
+		insert(myTrist,vec[i]);
+	}
+	vec.clear();
+
+	GetLocalTime(&st);
+	int end = (((st.wHour*60+st.wMinute)*60)+st.wSecond)*1000+st.wMilliseconds;
+	cerr << "End: " << end << endl;
+	cerr << "Elapsed Time(ms): " << end-start << endl;
+}
 
 void readFile(){
 
@@ -132,10 +256,16 @@ void readFile(){
 	ifstream inputFile("input.txt",ios::in);
 
 	int delay=0;
+	const int largeCoor=5000;
 
 	myPointSet.eraseAllPoints();
 	myTrist.eraseAllTris();
 	noIPTrist.eraseAllTris();
+
+	myPointSet.addPoint(-largeCoor,largeCoor/2);
+	myPointSet.addPoint(largeCoor,largeCoor/2);
+	myPointSet.addPoint(0,-largeCoor/2);
+	myTrist.makeTri(1,2,3);
 	if(inputFile.fail()){
 		cerr << "Error: Cannot read input file \"" << "input.txt" << "\"";
 		return;
@@ -182,7 +312,7 @@ void readFile(){
 			x=atoi(numberStr.c_str());
 			linestream >> numberStr;
 			y=atoi(numberStr.c_str());
-			if (IPhelper(myTrist, x, y))
+			if (IPhelper(myTrist, x, y, true))
 				cout<<"IP successfully!"<<endl;
 			else cout<<"The inserted point is not in any triangles"<<endl;
 		}
@@ -191,34 +321,16 @@ void readFile(){
 			delay=atoi(numberStr.c_str())*1000;
 			cout<<"Delay "<<numberStr<<" second(s) for each instruction"<<endl;
 		}
+		else if(!command.compare("CD")){
+			Delaunay();
+		}
 		else{
 			cerr << "Exception: Wrong input command" << endl;
 		}
 		display();
 	}
+	vec.clear();
 }
-
-bool IPhelper(Trist &tri1, int x, int y){
-	int i,a,b,c,d;
-	MyPoint pd;
-	x=x/scale[nowS];
-	y=y/scale[nowS];
-	pd.x=LongInt(x);
-	pd.y=LongInt(y);
-	for (i=1;i<=tri1.noTri();i++){
-		tri1.getVertexIdx(i<<3,a,b,c);
-		if (myPointSet.inTri(a,b,c,pd)>0){
-			d=myPointSet.addPoint(LongInt(x),LongInt(y));
-			tri1.delTri(i<<3);
-			tri1.makeTri(a,b,d);
-			tri1.makeTri(b,c,d);
-			tri1.makeTri(a,c,d);
-			return 1;
-		}
-	}
-	return 0;
-}
-
 
 void writeFile()
 {
@@ -240,39 +352,39 @@ void writeFile()
 void keyboard (unsigned char key, int x, int y)
 {
 	switch (key) {
-		case 'r':
-		case 'R':
-			readFile();
+	case 'r':
+	case 'R':
+		readFile();
 		break;
 
-		case 'w':
-		case 'W':
-			writeFile();
+	case 'w':
+	case 'W':
+		writeFile();
 		break;
 
-		case 'Q':
-		case 'q':
-			exit(0);
+	case 'Q':
+	case 'q':
+		exit(0);
 		break;
 
-		case '+':
-			if (nowS<19)
-				nowS++;
+	case '+':
+		if (nowS<18)
+			nowS++;
 		break;
 
-		case '-':
-			if (nowS>0)
-				nowS--;
+	case '-':
+		if (nowS>0)
+			nowS--;
 		break;
-
-		default:
+	case 'c':
+	case 'C':
+		Delaunay();
+	break;
+	default:
 		break;
 	}
-
 	glutPostRedisplay();
 }
-
-
 
 void mouse(int button, int state, int x, int y)
 {
@@ -290,28 +402,27 @@ void mouse(int button, int state, int x, int y)
 	{
 		x-=DX;
 		y-=DY;
-		if (IPhelper(myTrist, x, y))
+		if (IPhelper(myTrist, x, y, false))
 			cout<<"IP successfully!"<<endl;
 		else cout<<"The inserted point is not in any triangles"<<endl;
 	}
 	glutPostRedisplay();
 }
 
-
 void special(int key, int x, int y)
 {
 	switch (key) {
-		case GLUT_KEY_UP:
-			DY-=5;
+	case GLUT_KEY_UP:
+		DY-=5;
 		break;
-		case GLUT_KEY_DOWN:
-			DY+=5;
+	case GLUT_KEY_DOWN:
+		DY+=5;
 		break;
-		case GLUT_KEY_LEFT:
-			DX-=5;
+	case GLUT_KEY_LEFT:
+		DX-=5;
 		break;
-		case GLUT_KEY_RIGHT:
-			DX+=5;
+	case GLUT_KEY_RIGHT:
+		DX+=5;
 		break;
 	}
 	glutPostRedisplay();
