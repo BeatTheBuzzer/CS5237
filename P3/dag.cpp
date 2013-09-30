@@ -46,9 +46,11 @@ bool DAG::insert_helper(uo_tripple N, int p)
 		return true;
 	}
 
-	while (e != -1) 
+	while (e != -1) {
 		if (insert_helper(node[e], p)) 
 			return true;
+		e = nextEdge[e];
+	}
 
 	return false;
 }
