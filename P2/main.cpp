@@ -320,12 +320,15 @@ void writeFile()
 	ofstream fout(outfile,ios::out);
 	for (i=1;i<=myPointSet.noPt();i++){
 		myPointSet.getPoint(i,x1,y1);
-		fout<<"Point "<<i<<": "<<x1.printOut()<<"\t"<<y1.printOut()<<endl;
+		fout<<"IP :"<<x1.printOut()<<"\t"<<y1.printOut()<<endl;
 	}
+	/*
 	for (i=1;i<=noIPTrist.noTri();i++){
 		noIPTrist.getVertexIdx(i<<3,a,b,c);
 		fout<<"Triangle "<<i<<": "<<a<<"\t"<<b<<"\t"<<c<<endl;
 	}
+	*/
+	fout<<"CD"<<endl;
 	cout<<"Wirte to file successfully!"<<endl;
 }
 
