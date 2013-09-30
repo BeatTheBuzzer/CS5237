@@ -1,6 +1,5 @@
 #include "trist.h"
 
-
 Trist::Trist()
 {
 	en_[0] = 1;
@@ -9,70 +8,45 @@ Trist::Trist()
 	en_[3] = 5;
 	en_[4] = 3;
 	en_[5] = 4;
-
 }
 
-int Trist::noTri(){
+int Trist::noTri()
+{
 	return myTris.size();
 }
 
-bool Trist::getMap(FIndex f1, FIndex f2, OrTri &abc, OrTri &abd)
+void Trist::fmerge_helper(int ea, int eb)
 {
-	int i, u, v, v1[3], v2[3];
-	int idp1[2], idp2[2], idmap[22];
+	OrTri abc, abd;
+	std::pair<int, int> idx_pair;
 
-	f1 = f1 - 1;
-	f2 = f2 - 1;
-
-	for (i = 0; i < 3; i++) {
-		v1[i] = myTris[f1].vi_[i];
-		v2[i] = myTris[f2].vi_[i];
-	}
-
-	idp1[1] = idp2[1] = -1;
-	idmap[1] = 0; idmap[12] = 1; idmap[20] = 2;
-	idmap[10] = 3; idmap[21] = 4; idmap[2] = 5;
-
-	for (i = 0; i < 2; i++) {
-		for (u = 0; u < 3; u++) {
-			for (v = 0; v < 3; v++) {
-				if (v1[u] != -1 && v1[u] == v2[v]) {
-					idp1[i] = u;
-					idp2[i] = v;
-					v1[u] = v2[v] = -1;
-					break;
-				}
-			}
-			if (v < 3) break;
-		}
-	}
-	if (idp1[1] < 0) return false;
-
-	abc = ((f1 + 1) << 3) | idmap[idp1[0] * 10 + idp1[1]];
-	abd = ((f2 + 1) << 3) | idmap[idp2[0] * 10 + idp2[1]];
-	return true;
+	idx_pair = hash_edge2indices.getIdx(ea, eb);
+	if (idx_pair.second == -1) return;
+	abc = FIndex2OrTri(idx_pair.first, ea, eb);
+	abd = FIndex2OrTri(idx_pair.second, ea, eb);
+	fmerge(abc, abd);
 }
 
-int Trist::makeTri(int pIndex1,int pIndex2,int pIndex3,bool autoMerge){
+int Trist::makeTri(int pIndex1, int pIndex2, int pIndex3, bool autoMerge)
+{
+	int i, idx;
 	TriRecord tr1;
-	OrTri abc, abd;
-
-	int i, u, v;
-
+	
 	tr1.vi_[0]=pIndex1;
 	tr1.vi_[1]=pIndex2;
 	tr1.vi_[2]=pIndex3;
 	for (i = 0; i < 6; i++) tr1.fnext_[i] = -1;
 
 	myTris.push_back(tr1);
-	triMap[_uo_tripple(pIndex1, pIndex2, pIndex3)] = myTris.size();
+	idx = myTris.size();
+	hash_triangle2index.insert(pIndex1, pIndex2, pIndex3, idx);
+	hash_edge2indices.insert(pIndex1, pIndex2, idx);
+	hash_edge2indices.insert(pIndex1, pIndex3, idx);
+	hash_edge2indices.insert(pIndex2, pIndex3, idx);
 	if (autoMerge){
-		// automatically establish the fnext pointers to its neigbhours
-		v = myTris.size();
-		for (u = 1; u < v; u++) {
-			if (myTris[u-1].vi_[0] == -1) continue;
-			if (getMap(u, v, abc, abd)) fmerge(abc, abd);
-		}
+		fmerge_helper(pIndex1, pIndex2);
+		fmerge_helper(pIndex1, pIndex3);
+		fmerge_helper(pIndex2, pIndex3);
 	}
 	return myTris.size();
 }
@@ -80,12 +54,10 @@ int Trist::makeTri(int pIndex1,int pIndex2,int pIndex3,bool autoMerge){
 
 FIndex Trist::getTriangleIndex(int a, int b, int c)
 {
-	_uo_tripple ut(a, b, c);
-	if (triMap.find(ut) == triMap.end()) return -1;
-	return triMap[ut];
+	return hash_triangle2index.getIdx(a, b, c);
 }
 
-OrTri Trist::FIndex2OriTri(FIndex f, int a, int b)
+OrTri Trist::FIndex2OrTri(FIndex f, int a, int b)
 {
 	int j, id[2], idm[22];
 
@@ -110,37 +82,53 @@ OrTri Trist::FIndex2OriTri(FIndex f, int a, int b)
 	return ((f + 1) << 3) | idm[id[0] * 10 + id[1]];
 }
 
-void Trist::delTri(OrTri ef){
-	int u, v, w;
+/*
+	In order to prevent indices from changing, 
+	we only set vi_[0] = -1 for the related 
+	triangle.
+*/
+void Trist::delTri(OrTri ef)
+{
+	int u, v, w, idx;
 
 	getVertexIdx(ef, u, v, w);
 	fdetach(ef);
 	myTris[(ef>>3)-1].vi_[0] = -1;
-	triMap.erase(_uo_tripple(u, v, w));
+	idx = hash_triangle2index.getIdx(u, v, w);
+	hash_triangle2index.remove(u, v, w);
+	hash_edge2indices.remove(u, v, idx);
+	hash_edge2indices.remove(u, w, idx);
+	hash_edge2indices.remove(v, w, idx);
 }
 
-void Trist::eraseAllTris(){
+void Trist::eraseAllTris()
+{
 	myTris.clear();
-	triMap.clear();
+	hash_edge2indices.init();
+	hash_triangle2index.init();
 }
 		
-OrTri Trist::enext(OrTri ef){
+OrTri Trist::enext(OrTri ef)
+{
 	int tVersion = ef & 7, tIdx = (ef >> 3);
 	return (tIdx<<3)|en_[tVersion];
 }
 
-OrTri Trist::sym(OrTri ef){
+OrTri Trist::sym(OrTri ef)
+{
 	int tVersion = ef & 7, tIdx = (ef >> 3);
 	return (tIdx<<3)|(tVersion+3)%6;
 }
 
-OrTri Trist::fnext(OrTri ef){
+OrTri Trist::fnext(OrTri ef)
+{
 	int tVersion = ef & 7;
 	FIndex fIdx = (ef >> 3)-1;
 	return myTris[fIdx].fnext_[tVersion];
 }
 
-void Trist::getVertexIdx(OrTri ef, int& pIdx1,int& pIdx2,int& pIdx3){
+void Trist::getVertexIdx(OrTri ef, int& pIdx1, int& pIdx2, int& pIdx3)
+{
 	int tVersion = ef & 7;
 	FIndex fIdx = (ef >> 3)-1;
 	switch (tVersion){
@@ -179,7 +167,8 @@ void Trist::getVertexIdx(OrTri ef, int& pIdx1,int& pIdx2,int& pIdx3){
 	}
 }
 
-int Trist::org(OrTri ef){
+int Trist::org(OrTri ef)
+{
 	int tVersion = ef & 7, ret;
 	FIndex fIdx = (ef >> 3)-1;
 	switch (tVersion){
@@ -199,7 +188,8 @@ int Trist::org(OrTri ef){
 	return ret;
 }
 
-int Trist::dest(OrTri ef){
+int Trist::dest(OrTri ef)
+{
 	int tVersion = ef & 7, ret;
 	FIndex fIdx = (ef >> 3)-1;
 	switch (tVersion){
@@ -219,16 +209,16 @@ int Trist::dest(OrTri ef){
 	return ret;
 }
 
-void Trist::fmerge(OrTri abc, OrTri abd){
-	// glue two neighbouring triangles, result abd = fnext(abc)
+void Trist::fmerge(OrTri abc, OrTri abd)
+{
 	myTris[(abc >> 3) - 1].fnext_[abc & 7] = abd;
 	myTris[(sym(abc) >> 3) - 1].fnext_[sym(abc) & 7] = sym(abd);
 	myTris[(abd >> 3) - 1].fnext_[abd & 7] = abc;
 	myTris[(sym(abd) >> 3) - 1].fnext_[sym(abd) & 7] = sym(abc);
 }
 
-void Trist::fdetach(OrTri abc){
-	// detach triangle abc with all its neighbours (undo fmerge)
+void Trist::fdetach(OrTri abc)
+{
 	OrTri abd;
 	FIndex idx1;
 
@@ -241,15 +231,3 @@ void Trist::fdetach(OrTri abc){
 	}
 }
 
-void Trist::incidentTriangles(int ptIndex,int& noOrTri, OrTri* otList){
-	// A suggested function: you may want this function to return all the OrTri
-}
-
-void Trist::flipping(int i, int j, int idx,int idx1,int idx2, int idx3){
-	myTris[i-1].vi_[0] = idx;
-	myTris[i-1].vi_[1] = idx1;
-	myTris[i-1].vi_[2] = idx3;
-	myTris[j-1].vi_[0] = idx;
-	myTris[j-1].vi_[1] = idx2;
-	myTris[j-1].vi_[2] = idx3;
-}

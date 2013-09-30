@@ -1,6 +1,8 @@
 #ifndef TRISTH
 #define TRISTH
 
+#include "../hashtable.h"
+
 #include <vector>
 #include <map>
 #include <algorithm>
@@ -24,64 +26,42 @@
 
 */
 
-
-
 typedef  int OrTri;  // The OrTri data structure for a triangle
 typedef  int FIndex; // The index of a triangle Hint: NOT a triangle if it's negative
                      // You should be able to make all the triangle indices to be from 0 to n - 1 (n = number of triangles)
-
 class Trist;
 
 class TriRecord {
 	protected:
 		int vi_[3];
 		OrTri fnext_[6];
-
 	friend Trist;
 };
 
-
-
-
 class Trist {
-
 protected:
-
 	int en_[6];
 	std::vector<TriRecord> myTris;
-
+	hashtable_bi hash_edge2indices;
+	hashtable_tri hash_triangle2index;
 public:
-
-	void flipping(int i, int j, int idx,int idx1,int idx2, int idx3);
 	Trist();
-	int noTri(); // return the number of triangles
-	int makeTri(int pIndex1,int pIndex2,int pIndex3,bool autoMerge = false); // Add a triangle into the Trist with the three point indices
-	// Moreover, automatically establish the fnext pointers to its neigbhours if autoMerge = true
-
-	void delTri(OrTri); // Delete a triangle, but you can assume that this is ONLY used by the IP operation
-		                // You may want to make sure all its neighbours are detached (below)
-
+	int noTri();
+	int makeTri(int pIndex1, int pIndex2, int pIndex3, bool autoMerge = false);
+	void delTri(OrTri);
 	void eraseAllTris();
-		
 	OrTri enext(OrTri ef);
 	OrTri sym(OrTri ef);
 	OrTri fnext(OrTri ef);
-
-	void getVertexIdx(OrTri, int& pIdx1,int& pIdx2,int& pIdx3); // return the three indices of the three vertices by OrTri
-
-	int org(OrTri);  // the index of the first vertex of OrTri, e.g. org(bcd) => b
-	int dest(OrTri); // the index of the second vertex of OrTri, e.g. org(bcd) => c
-
-	void fmerge(OrTri abc, OrTri abd); // glue two neighbouring triangles, result abd = fnext(abc)
-	void fdetach(OrTri abc); // detach triangle abc with all its neighbours (undo fmerge)
-
-	void incidentTriangles(int ptIndex,int& noOrTri, OrTri* otList); // A suggested function: you may want this function to return all the OrTri
-		                                                                // that are incident to this point
-		                                                                // Ignore this if you don't feel a need
+	void getVertexIdx(OrTri, int& pIdx1, int& pIdx2, int& pIdx3);
+	int org(OrTri);
+	int dest(OrTri);
+	void fmerge(OrTri abc, OrTri abd);
+	void fdetach(OrTri abc);
 	FIndex getTriangleIndex(int a, int b, int c);
-	OrTri FIndex2OriTri(FIndex f, int a, int b);
+	OrTri FIndex2OrTri(FIndex f, int a, int b);
 private:
-	bool getMap(FIndex f1, FIndex f2, OrTri &abc, OrTri &abd);
+	void fmerge_helper(int ea, int eb);
 };
 
 

@@ -105,15 +105,12 @@ void display(void)
 
 void reshape (int w, int h)
 {
-
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity();
 	gluOrtho2D(0,w,h,0);  
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
-
 }
 
 void init(void)
@@ -156,84 +153,6 @@ int getVertex(Trist &tri, int idx, int idx1, int idx2, int &triangleIdx){
 		}
 	}
 	return -1;
-}
-
-void legalizeEdge(Trist &tri, int idx, int idx1, int idx2, int triangleIdx){
-	int triangleIdx2;
-	int idx3 = getVertex(myTrist, idx, idx1,idx2, triangleIdx2);
-	if(idx3==-1) return;
-	int ans = myPointSet.inCircle(idx,idx1,idx2,idx3);
-	
-	if(ans ==0){
-		cout<<"degenerate"<<endl;
-	}
-	if(ans > 0){
-		// flip edge idx1idx2 with idxidx3
-
-		//int triIdx1 = tri.makeTri(idx,idx1,idx3);
-		//int triIdx2 = tri.makeTri(idx,idx2,idx3);
-		tri.flipping(triangleIdx,triangleIdx2,idx,idx1,idx2,idx3);
-		legalizeEdge(tri,idx,idx1,idx3,triangleIdx);
-		legalizeEdge(tri,idx,idx2,idx3,triangleIdx2);
-		//tri.delTri(triangleIdx<<3);
-		//tri.delTri(triangleIdx2<<3);
-	}
-}
-
-bool IPhelper(Trist &tri1, int x, int y, bool readfile){
-	int i,a,b,c,d, triangleIdx1, triangleIdx2, triangleIdx3;
-	MyPoint pd;
-	cout<<x<<endl;cout<<y<<endl;
-	x=x/scale[nowS];
-	y=y/scale[nowS];
-	pd.x=LongInt(x);
-	pd.y=LongInt(y);
-	d=myPointSet.addPoint(LongInt(x),LongInt(y));
-	for (i=1;i<=tri1.noTri();i++){
-		tri1.getVertexIdx(i<<3,a,b,c);
-		if (myPointSet.inTri(a,b,c,pd)>0){					
-			vec.push_back(d);
-			if(readfile){
-				tri1.delTri(i<<3);
-				triangleIdx1 = tri1.makeTri(a,b,d);
-				triangleIdx2 = tri1.makeTri(b,c,d);
-				triangleIdx3 = tri1.makeTri(a,c,d);
-				legalizeEdge(tri1,d,a,b, triangleIdx1);			
-				legalizeEdge(tri1,d,b,c, triangleIdx2);
-				legalizeEdge(tri1,d,a,c, triangleIdx3);
-			}
-			return 1;
-		}
-	}
-	return 0;
-}
-
-void insert(Trist &tri1, int pIdx){
-	int i,a,b,c, triangleIdx1, triangleIdx2, triangleIdx3;
-	MyPoint pd;
-	myPointSet.getPoint(pIdx,pd.x,pd.y);
-	
-	for (i=1;i<=tri1.noTri();i++){
-		tri1.getVertexIdx(i<<3,a,b,c);
-		if (myPointSet.inTri(a,b,c,pd)>0){
-					
-			tri1.delTri(i<<3);
-			triangleIdx1 = tri1.makeTri(a,b,pIdx);
-			triangleIdx2 = tri1.makeTri(b,c,pIdx);
-			triangleIdx3 = tri1.makeTri(a,c,pIdx);
-			legalizeEdge(tri1,pIdx,a,b, triangleIdx1);			
-			legalizeEdge(tri1,pIdx,b,c, triangleIdx2);
-			legalizeEdge(tri1,pIdx,a,c, triangleIdx3);
-			return;
-		}
-	}
-}
-
-void Denaulay(){
-	for(int i=0;i<vec.size();i++){
-		insert(myTrist,vec[i]);
-	}
-	vec.clear();
 }
 
 void readFile(){
@@ -293,14 +212,8 @@ void readFile(){
 			noIPTrist.makeTri(idx[0],idx[1],idx[2]);
 		}
 		else if(!command.compare("IP")){
-			int x, y;
 			linestream >> numberStr;
-			x=atoi(numberStr.c_str());
 			linestream >> numberStr;
-			y=atoi(numberStr.c_str());
-			if (IPhelper(myTrist, x, y, true))
-				cout<<"IP successfully!"<<endl;
-			else cout<<"The inserted point is not in any triangles"<<endl;
 		}
 		else if(!command.compare("DY")){
 			linestream >> numberStr;
@@ -362,10 +275,6 @@ void keyboard (unsigned char key, int x, int y)
 		if (nowS>0)
 			nowS--;
 		break;
-	case 'c':
-	case 'C':
-		Denaulay();
-	break;
 	default:
 		break;
 	}
@@ -386,11 +295,6 @@ void mouse(int button, int state, int x, int y)
 	};
 	if((button == MOUSE_RIGHT_BUTTON)&&(state == GLUT_UP))
 	{
-		x-=DX;
-		y-=DY;
-		if (IPhelper(myTrist, x, y, false))
-			cout<<"IP successfully!"<<endl;
-		else cout<<"The inserted point is not in any triangles"<<endl;
 	}
 	glutPostRedisplay();
 }
@@ -458,7 +362,7 @@ void FLIPHelper_(DAG &dag, int ea, int eb, int p)
 	int a, b, c, p2;
 
 	f1 = myTrist.getTriangleIndex(ea, eb, p);
-	ot1 = myTrist.FIndex2OriTri(f1, ea, eb);
+	ot1 = myTrist.FIndex2OrTri(f1, ea, eb);
 	ot2 = myTrist.fnext(ot1);
 	if (ot2 < 0) return;
 	myTrist.getVertexIdx(ot2, a, b, c);
