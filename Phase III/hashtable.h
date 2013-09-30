@@ -8,15 +8,16 @@
 
 struct bi
 {
-	int a, b, idx;
+	int a, b;
+	std::pair<int, int> idx;
 	
-	bi() { setVal(0, 0, 0); }
-	bi(int a, int b, int idx) { setVal(a, b, idx); }
-	void setVal(int a, int b, int idx) 
+	bi() { setVal(0, 0); }
+	bi(int a, int b, int idx1 = -1, int idx2 = -1) { setVal(a, b, idx1, idx2); }
+	void setVal(int a, int b, int idx1 = -1, int idx2 = -1) 
 	{
 		this->a = a;
 		this->b = b;
-		this->idx = idx;
+		this->idx = std::make_pair(idx1, idx2);
 	}
 };
 
@@ -41,7 +42,9 @@ public:
 	hashtable_bi(int prime = DEFAULT_PRIME);
 	void init(int prime = DEFAULT_PRIME);
 	void insert(int a, int b, int idx);
-	int getIdx(int a, int b);
+	void remove(int a, int b, int idx);
+	void remove(int a, int b);
+	std::pair<int, int> getIdx(int a, int b);
 private:
 	int eg, PRIME;
 	std::vector<bi> node;
@@ -55,6 +58,7 @@ public:
 	hashtable_tri(int prime = DEFAULT_PRIME);
 	void init(int prime = DEFAULT_PRIME);
 	void insert(int a, int b, int c, int idx);
+	void remove(int a, int b, int c);
 	int getIdx(int a, int b, int c);
 private:
 	int eg, PRIME;

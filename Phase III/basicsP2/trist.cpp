@@ -1,15 +1,6 @@
 #include "trist.h"
 
 
-bool operator < (const _uo_tripple &A, const _uo_tripple &B)
-{
-	if (A.a < B.a) return true;
-	if (A.a > B.a) return false;
-	if (A.b < B.b) return true;
-	if (A.b > B.b) return false;
-	return A.c < B.c;
-}
-
 Trist::Trist()
 {
 	en_[0] = 1;

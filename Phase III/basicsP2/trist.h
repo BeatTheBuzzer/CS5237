@@ -5,28 +5,6 @@
 #include <map>
 #include <algorithm>
 
-struct _uo_tripple
-{
-	int a, b, c;
-	_uo_tripple() {}
-	_uo_tripple(int u, int v, int t)
-	{
-		a = u;
-		b = v;
-		c = t;
-		arrange();
-	}
-	void arrange()
-	{
-		if (a > b) std::swap(a, b);
-		if (a > c) std::swap(a, c);
-		if (b > c) std::swap(b, c);
-	}
-};
-
-
-bool operator < (const _uo_tripple &A, const _uo_tripple &B);
-
 /*
 
   For a triangle abc, if version 0 is abc
@@ -71,7 +49,6 @@ protected:
 
 	int en_[6];
 	std::vector<TriRecord> myTris;
-	std::map<_uo_tripple, FIndex> triMap;
 
 public:
 
