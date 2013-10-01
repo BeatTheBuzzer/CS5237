@@ -60,6 +60,7 @@ public:
 	void fdetach(OrTri abc);
 	FIndex getTriangleIndex(int a, int b, int c);
 	OrTri FIndex2OrTri(FIndex f, int a, int b);
+	std::pair<int, int> fromEdge2Indices(int eg_a, int eg_b);
 private:
 	void fmerge_helper(int ea, int eb);
 };

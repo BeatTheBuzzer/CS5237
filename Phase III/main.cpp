@@ -13,16 +13,19 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <stack>
 using namespace std;
 
+const int largeCoor=500;
+
+DAG dag;
 PointSetArray myPointSet;
 Trist myTrist, noIPTrist;
 std::vector<int> vec;
+std::stack<pair<int, int>> eg_stack;
 double scale[]={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 int nowS=9;
 int DX=500, DY=300;
-
-bool IPhelper(Trist &tri1, int x, int y);
 
 void delaunay_triangulation();
 
@@ -94,7 +97,7 @@ void display(void)
 		drawATriangle(ix1,ix2,ix3);
 	}
 
-	for (i=1;i<=myPointSet.noPt();i++){
+	for (i=4;i<=myPointSet.noPt();i++){
 		myPointSet.getPoint(i,x1,y1);
 		drawAPoint(atof(x1.printOut().c_str()),atof(y1.printOut().c_str()));
 	}
@@ -171,6 +174,9 @@ void readFile(){
 	myPointSet.eraseAllPoints();
 	myTrist.eraseAllTris();
 	noIPTrist.eraseAllTris();
+	myPointSet.addPoint(-largeCoor,largeCoor/2);
+	myPointSet.addPoint(largeCoor,largeCoor/2);
+	myPointSet.addPoint(0,-largeCoor/2);
 	if(inputFile.fail()){
 		cerr << "Error: Cannot read input file \"" << "input.txt" << "\"";
 		return;
@@ -233,18 +239,18 @@ void readFile(){
 
 void writeFile()
 {
+	char linenum[10];
 	char outfile[]="savefile.txt";
-	int i,a,b,c;
 	LongInt x1,y1;
 	ofstream fout(outfile,ios::out);
-	for (i=1;i<=myPointSet.noPt();i++){
+	for (int i=1;i<=myPointSet.noPt();i++){
 		myPointSet.getPoint(i,x1,y1);
-		fout<<"Point "<<i<<": "<<x1.printOut()<<"\t"<<y1.printOut()<<endl;
+		sprintf(linenum, "%04d", i - 1);
+		fout << linenum << ": AP " << x1.printOut() << " " << y1.printOut() << endl;
 	}
-	for (i=1;i<=noIPTrist.noTri();i++){
-		noIPTrist.getVertexIdx(i<<3,a,b,c);
-		fout<<"Triangle "<<i<<": "<<a<<"\t"<<b<<"\t"<<c<<endl;
-	}
+	sprintf(linenum, "%04d", myPointSet.noPt());
+	fout << linenum << ": CD" << endl;
+	fout.close();
 	cout<<"Wirte to file successfully!"<<endl;
 }
 
@@ -255,22 +261,18 @@ void keyboard (unsigned char key, int x, int y)
 	case 'R':
 		readFile();
 		break;
-
 	case 'w':
 	case 'W':
 		writeFile();
 		break;
-
 	case 'Q':
 	case 'q':
 		exit(0);
 		break;
-
 	case '+':
 		if (nowS<19)
 			nowS++;
 		break;
-
 	case '-':
 		if (nowS>0)
 			nowS--;
@@ -324,7 +326,7 @@ int main(int argc, char **argv)
 	cout << "Right mouse click: OT operation"<<endl;
 	cout << "Q: Quit" <<endl;
 	cout << "R: Read in control points from \"input.txt\"" <<endl;
-	cout << "W: Write control points to \"input.txt\"" <<endl;
+	cout << "W: Write control points to \"savefile.txt\"" <<endl;
 	glutInit(&argc, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize (1000, 700);
@@ -341,68 +343,105 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-bool IPHelper(uo_tripple ut, int pidx)
+bool IPHelper(quad_indices qi, int pidx)
 {
 	int idx;
-	
-	if ((idx = myTrist.getTriangleIndex(ut.a, ut.b, ut.c)) < 0) return false;
-	myTrist.delTri(idx << 3);
-	myTrist.makeTri(ut.a, ut.b, pidx, true);
-	myTrist.makeTri(ut.a, ut.c, pidx, true);
-	myTrist.makeTri(ut.b, ut.c, pidx, true);
+
+	while (!eg_stack.empty()) eg_stack.pop();
+
+	if (qi.d == -1) {
+		if ((idx = myTrist.getTriangleIndex(qi.a, qi.b, qi.c)) < 0) return false;
+		myTrist.delTri(idx << 3);
+		myTrist.makeTri(qi.a, qi.b, pidx, true);
+		myTrist.makeTri(qi.a, qi.c, pidx, true);
+		myTrist.makeTri(qi.b, qi.c, pidx, true);
+		eg_stack.push(make_pair(qi.a, qi.b));
+		eg_stack.push(make_pair(qi.a, qi.c));
+		eg_stack.push(make_pair(qi.b, qi.c));
+	}
+	else {
+		if ((idx = myTrist.getTriangleIndex(qi.a, qi.b, qi.c)) < 0) return false;
+		myTrist.delTri(idx << 3);
+		myTrist.makeTri(qi.a, qi.c, pidx, true);
+		myTrist.makeTri(qi.b, qi.c, pidx, true);
+
+		if ((idx = myTrist.getTriangleIndex(qi.a, qi.b, qi.d)) < 0) return false;
+		myTrist.delTri(idx << 3);
+		myTrist.makeTri(qi.a, qi.d, pidx, true);
+		myTrist.makeTri(qi.b, qi.d, pidx, true);
+
+		eg_stack.push(make_pair(qi.a, qi.c));
+		eg_stack.push(make_pair(qi.a, qi.d));
+		eg_stack.push(make_pair(qi.b, qi.c));
+		eg_stack.push(make_pair(qi.b, qi.d));
+	}
 
 	return true;
 }
 
-
-void FLIPHelper_(DAG &dag, int ea, int eb, int p)
+void legalize(pair<int, int> edge)
 {
-	FIndex f1;
 	OrTri ot1, ot2;
-	int a, b, c, p2;
+	int a, b, u, v, incir;
+	pair<int, int> indices;
+	
+	indices = myTrist.fromEdge2Indices(edge.first, edge.second);
+	if (indices.second == -1) return;
+	ot1 = myTrist.FIndex2OrTri(indices.first, edge.first, edge.second);
+	ot2 = myTrist.FIndex2OrTri(indices.second, edge.first, edge.second);
+	myTrist.getVertexIdx(ot1, a, b, u);
+	myTrist.getVertexIdx(ot2, a, b, v);
+	
+	incir = myPointSet.inCircle(edge.first, edge.second, u, v);
+	if (incir == 0) {
+		cerr << "Degeneracy!" << endl;
+		return;
+		exit(-1);
+	}
+	else if (incir < 0) return;
 
-	f1 = myTrist.getTriangleIndex(ea, eb, p);
-	ot1 = myTrist.FIndex2OrTri(f1, ea, eb);
-	ot2 = myTrist.fnext(ot1);
-	if (ot2 < 0) return;
-	myTrist.getVertexIdx(ot2, a, b, c);
-	if (myPointSet.inCircle(a, b, c, p) < 0) return;
-
-	if (a != ea && a != eb) p2 = a;
-	else if (b != ea && b != eb) p2 = b;
-	else p2 = c;
 	myTrist.delTri(ot1);
 	myTrist.delTri(ot2);
-	myTrist.makeTri(ea, p, p2, true);
-	myTrist.makeTri(eb, p, p2, true);
-	dag.flip(ea, eb, p, p2);
+	myTrist.makeTri(edge.first, u, v, true);
+	myTrist.makeTri(edge.second, u, v, true);
+	eg_stack.push(make_pair(edge.first, u));
+	eg_stack.push(make_pair(edge.first, v));
+	eg_stack.push(make_pair(edge.second, u));
+	eg_stack.push(make_pair(edge.second, v));
+	dag.flip(edge.first, edge.second, u, v);
 }
 
-void FLIPHelper(DAG &dag, uo_tripple ut, int p)
+void edge_legalization()
 {
-	FLIPHelper_(dag, ut.a, ut.b, p);
-	display();
-	FLIPHelper_(dag, ut.a, ut.c, p);
-	display();
-	FLIPHelper_(dag, ut.b, ut.c, p);
-	display();
+	pair<int, int> edge;
+
+	while (!eg_stack.empty()) {
+		edge = eg_stack.top();
+		eg_stack.pop();
+		legalize(edge);
+	}
 }
 
 void delaunay_triangulation()
 {
-	DAG dag;
-	int i;
-	uo_tripple ut;
+	int i, a, b, c;
+	quad_indices qi;
 
-	dag.init(&myPointSet, 1, 2, 3);
+	dag.init(&myPointSet, &myTrist, 1, 2, 3);
 	myTrist.eraseAllTris();
 	myTrist.makeTri(1, 2, 3);
 
 	for (i = 4; i <= myPointSet.noPt(); i++) {
-		ut = dag.insert(i);
-		if (ut.a == 0 && ut.b == 0 && ut.c == 0) continue;
-		if (!IPHelper(ut, i)) return;
-		display();
-		FLIPHelper(dag, ut, i);
+		qi = dag.insert(i);
+		if (qi.a == -1 && qi.b == -1 && qi.c == -1 && qi.d == -1) continue;
+		if (!IPHelper(qi, i)) return;
+		edge_legalization();
+	}
+
+	for (i = 1; i <= myTrist.noTri(); i++) {
+		myTrist.getVertexIdx(i << 3, a, b, c);
+		if (a == 1 || a == 2 || a == 3) myTrist.delTri(i << 3);
+		if (b == 1 || b == 2 || b == 3) myTrist.delTri(i << 3);
+		if (c == 1 || c == 2 || c == 3) myTrist.delTri(i << 3);
 	}
 }

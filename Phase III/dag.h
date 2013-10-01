@@ -8,6 +8,18 @@
 #include <vector>
 #include <algorithm>
 
+struct quad_indices
+{
+	int a, b, c, d;
+	quad_indices() {}
+	quad_indices(int a, int b, int c, int d) {
+		this->a = a;
+		this->b = b;
+		this->c = c;
+		this->d = d;
+	}
+};
+
 struct uo_tripple
 {
 	int a, b, c;
@@ -32,8 +44,8 @@ bool operator < (const uo_tripple &A, const uo_tripple &B);
 class DAG
 {
 public:
-	void init(void *pointSet, int a, int b, int c);
-	uo_tripple insert(int p);
+	void init(void *pointSet, void *trist, int a, int b, int c);
+	quad_indices insert(int p);
 	void flip(int eg_a, int eg_b, int p1, int p2);
 private:
 	int eg;
@@ -42,11 +54,17 @@ private:
 	std::map<uo_tripple, int> table;
 
 	PointSet *ps;
+	Trist *myTrist;
 
-	uo_tripple ancestor_node, insert_node;
+	uo_tripple ancestor_node;
+	quad_indices insert_node;
 
 	void add_edge(uo_tripple A, uo_tripple B);
 	bool insert_helper(uo_tripple N, int p);
+	bool split4_helper(uo_tripple N, int p);
+
+	bool isInEdge(int eg_a, int eg_b, int p);
+	int getAnotherPoint(int a, int b, int c, int u, int v);
 };
 
 

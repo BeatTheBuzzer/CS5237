@@ -46,7 +46,7 @@ void hashtable_bi::remove(int a, int b, int idx)
 
 	if (a > b) std::swap(a, b);
 	t = ((((unsigned long long)a) << 31) | b) % PRIME;
-	e = table[int(t)];;
+	e = table[int(t)];
 	while (e != -1) {
 		if (node[e].a == a && node[e].b == b) {
 			if (node[e].idx.second == idx) 

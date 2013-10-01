@@ -231,3 +231,7 @@ void Trist::fdetach(OrTri abc)
 	}
 }
 
+std::pair<int, int> Trist::fromEdge2Indices(int eg_a, int eg_b)
+{
+	return hash_edge2indices.getIdx(eg_a, eg_b);
+}

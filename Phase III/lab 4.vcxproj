@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Phase II</ProjectName>
+    <ProjectName>Phase III</ProjectName>
     <ProjectGuid>{B9156095-8BB2-4286-912E-B511954787BE}</ProjectGuid>
     <RootNamespace>lab4</RootNamespace>
   </PropertyGroup>
