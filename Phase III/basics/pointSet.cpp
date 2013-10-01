@@ -127,7 +127,7 @@ int PointSet::sign_xmul(int eg_a, int eg_b, int p)
 	eg_a = eg_a - 1;
 	eg_b = eg_b - 1;
 
-	ux = myPoints[eg_a].x - myPoints[eg_a].x;
+	ux = myPoints[eg_b].x - myPoints[eg_a].x;
 	uy = myPoints[eg_b].y - myPoints[eg_a].y;
 	vx = myPoints[p].x - myPoints[eg_b].x;
 	vy = myPoints[p].y - myPoints[eg_b].y;

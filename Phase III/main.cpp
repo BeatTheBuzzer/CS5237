@@ -26,6 +26,7 @@ std::stack<pair<int, int>> eg_stack;
 double scale[]={0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 int nowS=9;
 int DX=500, DY=300;
+int delay;
 
 void delaunay_triangulation();
 
@@ -81,7 +82,6 @@ void drawATriangle(int ix1, int ix2, int ix3)
 	drawALine(x1,y1,x2,y2);
 	drawALine(x1,y1,x3,y3);
 	drawALine(x2,y2,x3,y3);
-
 }
 
 void display(void)
@@ -104,6 +104,7 @@ void display(void)
 
 	glPopMatrix();
 	glutSwapBuffers ();
+	if (delay > 0) Sleep(delay);
 }
 
 void reshape (int w, int h)
@@ -158,6 +159,25 @@ int getVertex(Trist &tri, int idx, int idx1, int idx2, int &triangleIdx){
 	return -1;
 }
 
+bool IPhelper(Trist &tri1, int x, int y, bool readfile){
+	int i,a,b,c,d, triangleIdx1, triangleIdx2, triangleIdx3;
+	MyPoint pd;
+	quad_indices qi;
+	//cout<<x<<endl;cout<<y<<endl;
+	x=x/scale[nowS];
+	y=y/scale[nowS];
+	pd.x=LongInt(x);
+	pd.y=LongInt(y);
+	d=myPointSet.addPoint(LongInt(x),LongInt(y));
+
+	qi = dag.insert(d);
+	if (qi.d != -1 || qi.a == -1) return false;
+	myTrist.makeTri(qi.a, qi.b, d, true);
+	myTrist.makeTri(qi.a, qi.c, d, true);
+	myTrist.makeTri(qi.b, qi.c, d, true);
+	return true;
+}
+
 void readFile(){
 
 	string line_noStr;
@@ -168,8 +188,7 @@ void readFile(){
 	string outputAns = "Answer of your computation"; // the answer you computed
 
 	ifstream inputFile("input.txt",ios::in);
-
-	int delay=0;
+	delay = 0;
 
 	myPointSet.eraseAllPoints();
 	myTrist.eraseAllTris();
@@ -194,8 +213,6 @@ void readFile(){
 
 		linestream >> line_noStr;
 		linestream >> command;         // get the command
-		if (delay>0)
-			Sleep(delay);
 
 		if(!command.compare("AP")){
 			linestream >> numberStr;
@@ -218,8 +235,14 @@ void readFile(){
 			noIPTrist.makeTri(idx[0],idx[1],idx[2]);
 		}
 		else if(!command.compare("IP")){
+			int x, y;
 			linestream >> numberStr;
+			x=atoi(numberStr.c_str());
 			linestream >> numberStr;
+			y=atoi(numberStr.c_str());
+			if (IPhelper(myTrist, x, y, true))
+				cout<<"IP successfully!"<<endl;
+			else cout<<"The inserted point is not in any triangles"<<endl;
 		}
 		else if(!command.compare("DY")){
 			linestream >> numberStr;
@@ -277,6 +300,10 @@ void keyboard (unsigned char key, int x, int y)
 		if (nowS>0)
 			nowS--;
 		break;
+	case 'c':
+	case 'C':
+		delaunay_triangulation();
+		break;
 	default:
 		break;
 	}
@@ -297,6 +324,11 @@ void mouse(int button, int state, int x, int y)
 	};
 	if((button == MOUSE_RIGHT_BUTTON)&&(state == GLUT_UP))
 	{
+		x-=DX;
+		y-=DY;
+		if (IPhelper(myTrist, x, y, false))
+			cout<<"IP successfully!"<<endl;
+		else cout<<"The inserted point is not in any triangles"<<endl;
 	}
 	glutPostRedisplay();
 }
@@ -352,9 +384,13 @@ bool IPHelper(quad_indices qi, int pidx)
 	if (qi.d == -1) {
 		if ((idx = myTrist.getTriangleIndex(qi.a, qi.b, qi.c)) < 0) return false;
 		myTrist.delTri(idx << 3);
+		display();
 		myTrist.makeTri(qi.a, qi.b, pidx, true);
+		display();
 		myTrist.makeTri(qi.a, qi.c, pidx, true);
+		display();
 		myTrist.makeTri(qi.b, qi.c, pidx, true);
+		display();
 		eg_stack.push(make_pair(qi.a, qi.b));
 		eg_stack.push(make_pair(qi.a, qi.c));
 		eg_stack.push(make_pair(qi.b, qi.c));
@@ -362,13 +398,19 @@ bool IPHelper(quad_indices qi, int pidx)
 	else {
 		if ((idx = myTrist.getTriangleIndex(qi.a, qi.b, qi.c)) < 0) return false;
 		myTrist.delTri(idx << 3);
+		display();
 		myTrist.makeTri(qi.a, qi.c, pidx, true);
+		display();
 		myTrist.makeTri(qi.b, qi.c, pidx, true);
+		display();
 
 		if ((idx = myTrist.getTriangleIndex(qi.a, qi.b, qi.d)) < 0) return false;
 		myTrist.delTri(idx << 3);
+		display();
 		myTrist.makeTri(qi.a, qi.d, pidx, true);
+		display();
 		myTrist.makeTri(qi.b, qi.d, pidx, true);
+		display();
 
 		eg_stack.push(make_pair(qi.a, qi.c));
 		eg_stack.push(make_pair(qi.a, qi.d));
@@ -391,19 +433,23 @@ void legalize(pair<int, int> edge)
 	ot2 = myTrist.FIndex2OrTri(indices.second, edge.first, edge.second);
 	myTrist.getVertexIdx(ot1, a, b, u);
 	myTrist.getVertexIdx(ot2, a, b, v);
+	if (u == v) return;
 	
 	incir = myPointSet.inCircle(edge.first, edge.second, u, v);
 	if (incir == 0) {
 		cerr << "Degeneracy!" << endl;
-		return;
 		exit(-1);
 	}
 	else if (incir < 0) return;
 
 	myTrist.delTri(ot1);
+	display();
 	myTrist.delTri(ot2);
+	display();
 	myTrist.makeTri(edge.first, u, v, true);
+	display();
 	myTrist.makeTri(edge.second, u, v, true);
+	display();
 	eg_stack.push(make_pair(edge.first, u));
 	eg_stack.push(make_pair(edge.first, v));
 	eg_stack.push(make_pair(edge.second, u));
@@ -427,9 +473,15 @@ void delaunay_triangulation()
 	int i, a, b, c;
 	quad_indices qi;
 
+	SYSTEMTIME st;
+	GetLocalTime(&st);
+	int start = (((st.wHour*60+st.wMinute)*60)+st.wSecond)*1000+st.wMilliseconds;
+	cerr << "Start: " << start << endl;
+
 	dag.init(&myPointSet, &myTrist, 1, 2, 3);
 	myTrist.eraseAllTris();
 	myTrist.makeTri(1, 2, 3);
+	display();
 
 	for (i = 4; i <= myPointSet.noPt(); i++) {
 		qi = dag.insert(i);
@@ -444,4 +496,9 @@ void delaunay_triangulation()
 		if (b == 1 || b == 2 || b == 3) myTrist.delTri(i << 3);
 		if (c == 1 || c == 2 || c == 3) myTrist.delTri(i << 3);
 	}
+
+	GetLocalTime(&st);
+	int end = (((st.wHour*60+st.wMinute)*60)+st.wSecond)*1000+st.wMilliseconds;
+	cerr << "End: " << end << endl;
+	cerr << "Elapsed Time(ms): " << end-start << endl;
 }

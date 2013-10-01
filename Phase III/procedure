@@ -1,9 +1,0 @@
-Delaunay Triangulation
-1. DAG.init(ABC), trist.insert(ABC)
-2. DAG.insert(P) => uo_triangle ut, trist.iphelper(ut, P)
-3. For edge<a, b>
-	trist.nextFace(ut.a, ut.b, P) => P'
-	trist.incircleTest(ut.a, ut.b, P, P')
-		NO:
-			trist.flip(ut.a, ut.b, P, P')
-			DAG.flip(ut.a, ut.b, P, P')
