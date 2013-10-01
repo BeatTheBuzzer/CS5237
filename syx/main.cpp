@@ -22,8 +22,8 @@ int nowS=9;
 int DX=500, DY=300;
 
 bool IPhelper(Trist &tri1, int x, int y);
-void edgeFlippingAlgo(int ptIdx, OrTri tri);
-void flipEdge(OrTri curTri, OrTri nextTri, int a, int b, int c, int d);
+void legalizeEdge(int ptIdx, OrTri tri);
+void flipEdge(OrTri curTri, OrTri nextTri, int a, int b, int c, int d, OrTri &newTri1, OrTri &newTri2);
 
 // These three functions are for those who are not familiar with OpenGL, you can change these or even completely ignore them
 
@@ -221,10 +221,12 @@ bool IPhelper(Trist &tri1, int x, int y){
 			tri1.makeTri(b, c, d, true);
 			tri1.makeTri(a, c, d, true);
 
-			int tNo = delaunayTri.makeTri(a, b, d, true);
-			delaunayTri.makeTri(b, c, d, true);
-			delaunayTri.makeTri(a, c, d, true);
-			edgeFlippingAlgo(d, tNo-1);
+			int tNo1 = delaunayTri.makeTri(a, b, d, true)-1;
+			int tNo2 = delaunayTri.makeTri(b, c, d, true)-1;
+			int tNo3 = delaunayTri.makeTri(a, c, d, true)-1;
+			legalizeEdge(d, tNo1<<3);
+			legalizeEdge(d, tNo2<<3);
+			legalizeEdge(d, tNo3<<3);
 
 			return 1;
 		}
@@ -250,24 +252,27 @@ void writeFile()
 	cout<<"Wirte to file successfully!"<<endl;
 }
 
-void edgeFlippingAlgo(int ptIdx, OrTri tri){
-	for(int j=0;j<3;j++){
-		int a, b, c, d = ptIdx;
-		OrTri triIdx = (tri+j)<<3;
-		OrTri nextTri = delaunayTri.fnext(triIdx);
-		if(nextTri > 0){
-			delaunayTri.getVertexIdx(nextTri, a, b, c);
-			if(myPointSet.inCircle(a, b, c, d)>0)
-				flipEdge(triIdx, nextTri, a, b, c, d);
+void legalizeEdge(int ptIdx, OrTri triIdx){
+	int a, b, c, d = ptIdx;
+	OrTri nextTri = delaunayTri.fnext(triIdx);
+	if(nextTri > 0){
+		delaunayTri.getVertexIdx(nextTri, a, b, c);
+		if(myPointSet.inCircle(a, b, c, d)>0){
+			OrTri newTri1, newTri2;
+			flipEdge(triIdx, nextTri, a, b, c, d, newTri1, newTri2);
+			legalizeEdge(d, newTri1);
+			legalizeEdge(d, newTri2);
 		}
 	}
 }
 
-void flipEdge(OrTri curTri, OrTri nextTri, int a, int b, int c, int d){
+void flipEdge(OrTri curTri, OrTri nextTri, int a, int b, int c, int d, OrTri &newTri1, OrTri &newTri2){
 	delaunayTri.delTri(curTri);
 	delaunayTri.delTri(nextTri);
-	delaunayTri.makeTri(a, c, d, true);
-	delaunayTri.makeTri(b, c, d, true);
+	int newT1 = delaunayTri.makeTri(a, c, d, true)-1;
+	int newT2 = delaunayTri.makeTri(b, c, d, true)-1;
+	newTri1 = newT1<<3;
+	newTri2 = newT2<<3;
 }
 
 void computeDelaunay(){
